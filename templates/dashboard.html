@@ -1,0 +1,78 @@
+
+{% extends "base.html" %}
+{% block title %}Accueil — Station de Traitement des Eaux{% endblock %}
+{% block content %}
+<div class="hero">
+  <div class="hero-left">
+    <div class="water-drop">💧</div>
+    <div><h1>Station de Traitement des Eaux</h1><p>Suivi en temps réel des paramètres de la station</p></div>
+  </div>
+  <div class="hero-right">
+    <div class="date-card"><span>▣</span><div>{{ now.strftime('%A %d %B %Y')|capitalize }}<strong>{{ now.strftime('%H:%M') }}</strong></div></div>
+    <div class="weather-card"><span>☀</span><div><b>26°C</b><small>Casablanca</small></div></div>
+  </div>
+</div>
+
+<section class="kpis">
+  <div class="kpi"><span class="ico green">⚗</span><div><small>pH Moyen</small><b>7.2</b><em>✓ Normal</em></div></div>
+  <div class="kpi"><span class="ico teal">♨</span><div><small>Température</small><b>22.5 °C</b><em>✓ Normal</em></div></div>
+  <div class="kpi"><span class="ico blue">≋</span><div><small>Conductivité</small><b>512 µS/cm</b><em>✓ Normal</em></div></div>
+  <div class="kpi"><span class="ico blue">◯</span><div><small>Turbidité</small><b>0.28 NTU</b><em>✓ Normal</em></div></div>
+  <div class="kpi"><span class="ico blue">⚙</span><div><small>Chlore</small><b>0.62 mg/L</b><em>✓ Normal</em></div></div>
+  <div class="kpi"><span class="ico darkgreen">▥</span><div><small>TDS</small><b>145 mg/L</b><em>✓ Normal</em></div></div>
+</section>
+
+<section class="synoptic-card">
+  <div class="synoptic-wrap">
+    <img src="{{ url_for('static', filename='synoptique_station.png') }}" alt="Synoptique de la station de traitement des eaux">
+    {% set coords = {
+      'PT-01': (9.8,26.8), 'PT-02': (9.8,60.5), 'PT-03': (30.2,44.6),
+      'PT-04': (49.1,43.4), 'PT-05': (61.0,43.4), 'PT-06': (71.8,43.4),
+      'PT-07': (82.4,43.4), 'PT-08': (91.0,43.4), 'PT-09': (96.1,43.4)
+    } %}
+    {% for p in points %}
+      {% set c = coords[p.code] %}
+      <a class="hotspot {{ statuses[p.code] }}{% if missing[p.code] %} blink{% endif %}" href="{{ url_for('measure', code=p.code) }}"
+         style="left:{{c[0]}}%;top:{{c[1]}}%;" title="{{p.code}} — {{p.name}}">
+        <span>{{p.code}}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="bottom-grid">
+  <div class="panel">
+    <div class="panel-head"><h2><span class="red-icon">▥</span>Dernières mesures</h2><a href="{{ url_for('history') }}">Voir toutes</a></div>
+    <table><thead><tr><th>Point</th><th>Paramètre</th><th>Valeur</th><th>Statut</th><th>Date</th></tr></thead>
+    <tbody>
+    {% for m in recent %}
+      <tr><td><b>{{m.point.code}}</b></td><td>{{m.parameter}}</td><td>{{m.value}} {{m.unit}}</td><td><span class="dot {{'ok' if m.compliant else 'nok'}}"></span></td><td>{{m.measured_at.strftime('%d/%m/%Y %H:%M')}}</td></tr>
+    {% else %}
+      <tr><td>PT-01</td><td>pH</td><td>—</td><td><span class="dot nok"></span></td><td>—</td></tr>
+      <tr><td>PT-02</td><td>Conductivité</td><td>—</td><td><span class="dot nok"></span></td><td>—</td></tr>
+    {% endfor %}
+    </tbody></table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2><span class="red-icon">♟</span>Alertes récentes</h2><a href="{{ url_for('alerts') }}">Voir toutes</a></div>
+    <table><thead><tr><th>Date</th><th>Point</th><th>Paramètre</th><th>Valeur</th><th>Statut</th></tr></thead>
+    <tbody>
+    {% for a in recent_alerts %}
+      <tr><td>{{a.created_at.strftime('%d/%m %H:%M')}}</td><td>{{a.point.code}}</td><td>{{a.parameter}}</td><td>{{a.value}} {{a.unit}}</td><td><span class="badge danger">Hors limite</span></td></tr>
+    {% else %}
+      <tr><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge neutral">Aucune alerte</span></td></tr>
+    {% endfor %}
+    </tbody></table>
+  </div>
+
+  <div class="panel global-panel">
+    <div class="panel-head"><h2>◕ État global</h2></div>
+    <div class="global-state {{ 'good' if station_ok else 'bad' }}">
+      <div class="check">{{ '✓' if station_ok else '!' }}</div>
+      <div><strong>{{ 'Station en fonctionnement' if station_ok else 'Contrôle requis' }}</strong>
+      <p>{{ 'Tous les paramètres sont dans les limites définies' if station_ok else 'Des points nécessitent une saisie ou une vérification' }}</p></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+
+{% extends "base.html" %}
+{% block title %}{{point.code}} — Mesures{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head"><div><span class="tag">{{point.code}}</span><h1>{{point.name}}</h1><p>Saisie des mesures du point de contrôle.</p></div><a class="back" href="{{url_for('dashboard')}}">← Retour</a></div>
+  <form method="post" class="measure-card">
+    <label>Opérateur<input name="operator" value="Opérateur"></label>
+    <div class="form-grid">
+      {% for p,u in parameters %}
+      <label>{{p}} <small>{{u}}</small><input type="number" step="any" name="{{p}}" value="{{values[p].value if p in values else ''}}"></label>
+      {% endfor %}
+    </div>
+    <button class="save">✓ Enregistrer les mesures</button>
+  </form>
+</div>
+{% endblock %}

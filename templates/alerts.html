@@ -1,0 +1,6 @@
+
+{% extends "base.html" %}{% block title %}Alertes{% endblock %}
+{% block content %}<div class="page"><div class="page-head"><div><h1>Alertes</h1><p>Suivi des valeurs hors limites.</p></div></div>
+<table class="big-table"><thead><tr><th>Date</th><th>Point</th><th>Paramètre</th><th>Valeur</th><th>Message</th><th>État</th></tr></thead><tbody>
+{% for a in alerts %}<tr><td>{{a.created_at.strftime('%d/%m/%Y %H:%M')}}</td><td>{{a.point.code}}</td><td>{{a.parameter}}</td><td>{{a.value}} {{a.unit}}</td><td>{{a.message}}</td><td>{% if a.closed %}<span class="badge neutral">Clôturée</span>{% else %}<span class="badge danger">Ouverte</span>{% endif %}</td></tr>{% else %}<tr><td colspan="6">Aucune alerte.</td></tr>{% endfor %}
+</tbody></table></div>{% endblock %}
